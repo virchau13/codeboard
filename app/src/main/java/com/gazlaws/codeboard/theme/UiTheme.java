@@ -45,7 +45,7 @@ public class UiTheme {
         theme.foregroundPaint.setTextSize(theme.fontHeight);
         theme.foregroundPaint.setTextAlign(Paint.Align.CENTER);
         theme.foregroundPaint.setAntiAlias(true);
-        theme.foregroundPaint.setTypeface(Typeface.DEFAULT);
+        theme.foregroundPaint.setTypeface(Typeface.MONOSPACE);
 
         return theme;
     }

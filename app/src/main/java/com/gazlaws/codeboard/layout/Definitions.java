@@ -20,7 +20,7 @@ public class Definitions {
         int CODE_ARROW_UP = 5002;
         int CODE_ARROW_RIGHT = 5003;
         keyboard.newRow()
-                .addKey("Esc", CODE_ESCAPE)
+                .addKey("⎋", CODE_ESCAPE)
                 .addTabKey()
                 .addKey(context.getDrawable(R.drawable.ic_keyboard_arrow_left_24dp), CODE_ARROW_LEFT).asRepeatable()
                 .addKey(context.getDrawable(R.drawable.ic_keyboard_arrow_down_24dp), CODE_ARROW_DOWN).asRepeatable()
@@ -32,7 +32,7 @@ public class Definitions {
 
     public void addCopyPasteRow(KeyboardLayoutBuilder keyboard) {
         keyboard.newRow()
-                .addKey("Esc", CODE_ESCAPE)
+                .addKey("⎋", CODE_ESCAPE)
                 .addTabKey()
                 .addKey(context.getDrawable(R.drawable.ic_select_all_24dp), 53737)
                 .addKey(context.getDrawable(R.drawable.ic_cut_24dp), 53738)
@@ -42,11 +42,31 @@ public class Definitions {
         ;
     }
 
+    private static KeyboardLayoutBuilder preprocessKey(KeyboardLayoutBuilder keyboard, char aChar) {
+        // TODO make this work for more than QWERTY
+        if('0' <= aChar && aChar <= '9') {
+            return keyboard.addKey(aChar).onShiftShow(Character.toString(
+                    aChar != '0' ? "!@#$%^&*(".charAt(aChar - '1') : ')'
+            ));
+        } else {
+            int idx = 
+                    ("-=[]" + "\\" + ";" +  "'" + ",./`").indexOf(aChar);
+            if(idx != -1) {
+                char corresponding = 
+                    ("_+{}" +  "|" + ":" + "\"" + "<>?~").charAt(idx);
+                return keyboard.addKey(aChar).onShiftShow(Character.toString(corresponding));
+            } else {
+                return keyboard.addKey(aChar);
+            }
+        }
+    }
 
     public static void addCustomRow(KeyboardLayoutBuilder keyboard, String symbols) {
         keyboard.newRow();
         char[] chars = symbols.toCharArray();
-        for (char aChar : chars) keyboard.addKey(aChar);
+        for (char aChar : chars) {
+            preprocessKey(keyboard, aChar);
+        }
     }
 
 
@@ -212,7 +232,7 @@ public class Definitions {
                 .addKey("F7", -12)
                 .addBackspaceKey()
                 .newRow()
-                .addKey("Ctrl", 17).asModifier().onCtrlShow("CTRL")
+                .addKey("✲", 17).asModifier().onCtrlShow("⎈")
                 .addKey("F8", -13)
                 .addKey("F9", -14)
                 .addKey("F10", -15)
@@ -238,14 +258,14 @@ public class Definitions {
     public void addCustomSpaceRow(KeyboardLayoutBuilder keyboard, String symbols) {
         char[] chars = symbols.toCharArray();
 
-        keyboard.newRow().addKey("Ctrl", 17).asModifier().onCtrlShow("CTRL");
+        keyboard.newRow().addKey("✲", 17).asModifier().onCtrlShow("⎈");
 
         for (int i = 0; i < (chars.length + 1) / 2 && chars.length > 0; i++) {
-            keyboard.addKey(chars[i]).withSize(.7f);
+            preprocessKey(keyboard, chars[i]).withSize(.7f);
         }
         keyboard.addKey(context.getDrawable(R.drawable.ic_space_bar_24dp), 32).withSize(2f);
         for (int i = (chars.length + 1) / 2; i < chars.length; i++) {
-            keyboard.addKey(chars[i]).withSize(.7f);
+            preprocessKey(keyboard, chars[i]).withSize(.7f);
         }
         keyboard.addEnterKey();
 

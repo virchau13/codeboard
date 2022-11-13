@@ -28,6 +28,8 @@ import android.view.ViewConfiguration;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+import android.view.KeyCharacterMap;
+import android.view.KeyEvent;
 import android.media.MediaPlayer; // for keypress sound
 
 import androidx.core.app.ActivityCompat;
@@ -74,7 +76,7 @@ public class CodeBoardIME extends InputMethodService
     private Timer timerLongPress = null;
     private KeyboardUiFactory mKeyboardUiFactory = null;
     private KeyboardLayoutView mCurrentKeyboardLayoutView = null;
-    private boolean longPressedSpaceButton = false;
+    private KeyCharacterMap keyLookup = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
 
     @Override
     public void onKey(int primaryCode, int[] KeyCodes) {
@@ -273,36 +275,30 @@ public class CodeBoardIME extends InputMethodService
                         break;
                     default:
                         //(t key) code 116-> ke 48
-                        if (Character.isLetter(code)) {
+                        if (Character.isLetter(code) /* Letters */
+                            || ('0' <= code && code <= '9')) { /* Numbers */
                             ke = KeyEvent.keyCodeFromString("KEYCODE_" + Character.toUpperCase(code));
+                        } else if ("-=[]\\;',./`".indexOf(code) != -1) {
+                            // HACK how fuckin janky is this again?
+                            char[] single = { Character.toUpperCase(code) };
+                            ke = keyLookup.getEvents(single)[0].getKeyCode();
                         }
 //                        if (primaryCode >= 48 && primaryCode <= 57) {
 //                            ke = KeyEvent.keyCodeFromString("KEYCODE_" + code);
 //                        }
                 }
                 if (ke != 0) {
-
                     Log.d(getClass().getSimpleName(), "onKey: keyEvent " + ke);
 
-                    /*
-                     *   The if statement was added in order to prevent the space button
-                     *   from having an action down event attached to it.
-                     *   Reason being that we first want to check
-                     *   whether the space button has been long pressed or not
-                     *   and afterwards produce the right output to the screen.
-                     *   TODO: Investigate whether KeyEvent.ACTION_UP is still required.
-                     */
-                    if (primaryCode != 32) {
-                        ic.sendKeyEvent(new KeyEvent(0, 0, KeyEvent.ACTION_DOWN, ke, 0, meta));
-                    }
-
+                    // Note that since modifiers are handled here,
+                    // the Shift modifiers work like they do on a regular keyboard,
+                    // e.g. shift+a => 'A', shift+0 => ')'.
+                    ic.sendKeyEvent(new KeyEvent(0, 0, KeyEvent.ACTION_DOWN, ke, 0, meta));
                     ic.sendKeyEvent(new KeyEvent(0, 0, KeyEvent.ACTION_UP, ke, 0, meta));
                 } else {
-                    //All non-letter characters are handled here
+                    // All non-letter characters are handled here
                     // This doesn't use modifiers.
                     // For most users, this usage makes sense.
-                    //eg. (0 key) code 48 -> ke 7
-                    // If we handled '0' with a keyEvent, shift+0 would result in ')'
                     Log.i(getClass().getSimpleName(), "onKey: committext " + String.valueOf(code));
                     ic.commitText(String.valueOf(code), 1);
                 }
@@ -377,21 +373,6 @@ public class CodeBoardIME extends InputMethodService
     }
 
     public void onRelease(int primaryCode) {
-
-        /*
-         *   After the space button is released,
-         *   we check whether it was long pressed or not.
-         *   If it was, we don't do anything,
-         *   but If it wasn't, we print a "space" to the screen.
-         */
-        if ((primaryCode == 32) && (!longPressedSpaceButton)) {
-
-            InputConnection ic = getCurrentInputConnection();
-            ic.commitText(String.valueOf((char) primaryCode), 1);
-        }
-
-        longPressedSpaceButton = false;
-
         clearLongPressTimer();
     }
 
@@ -424,9 +405,6 @@ public class CodeBoardIME extends InputMethodService
         }
 
         if (keyCode == 32) {
-
-            longPressedSpaceButton = true;
-
             InputMethodManager imm = (InputMethodManager)
                     getSystemService(Context.INPUT_METHOD_SERVICE);
             if (imm != null)

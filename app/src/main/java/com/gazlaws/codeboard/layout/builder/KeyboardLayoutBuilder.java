@@ -157,12 +157,12 @@ public class KeyboardLayoutBuilder {
     // common key definitions (extension methods)
 
     public KeyboardLayoutBuilder addTabKey(){
-        return addKey("Tab", 9);
+        return addKey("↹", 9);
     }
 
     public KeyboardLayoutBuilder addShiftKey(){
-        return addKey("Shft", 16).asModifier()
-            .onShiftShow("SHFT").withSize(1.5f);
+        return addKey("⇧", 16).asModifier()
+            .onShiftShow("⇪").withSize(1.5f);
     }
 
     public KeyboardLayoutBuilder addBackspaceKey(){
