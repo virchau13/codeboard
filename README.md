@@ -1,4 +1,4 @@
-# [codeboard](https://play.google.com/store/apps/details?id=com.gazlaws.codeboard)
+# codeboard
 
 ## What's this fork for?
 
