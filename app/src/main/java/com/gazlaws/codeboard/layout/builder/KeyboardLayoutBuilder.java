@@ -165,8 +165,13 @@ public class KeyboardLayoutBuilder {
             .onShiftShow("⇪").withSize(1.5f);
     }
 
+    public KeyboardLayoutBuilder addAltKey(){
+        return addKey("ALT", -64).asModifier()
+            .withSize(1.5f);
+    }
+
     public KeyboardLayoutBuilder addBackspaceKey(){
-        return addKey(context.getDrawable(R.drawable.ic_backspace_24dp), -5).asRepeatable();
+        return addKey(context.getDrawable(R.drawable.ic_backspace_24dp), -5).asRepeatable().withSize(1.5f);
     }
 
     public KeyboardLayoutBuilder addEnterKey(){

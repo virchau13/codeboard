@@ -13,7 +13,7 @@
             androidComposition = androidenv.composeAndroidPackages {
                 platformVersions = [ "30" ];
                 includeEmulator = true;
-                emulatorVersion = "31.3.9";
+                emulatorVersion = "33.1.17";
                 buildToolsVersions = [ buildToolsVersion ];
                 abiVersions = [ "x86" "x86_64" ];
                 includeSystemImages = true;

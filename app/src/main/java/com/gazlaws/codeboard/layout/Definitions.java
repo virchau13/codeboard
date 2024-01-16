@@ -26,7 +26,7 @@ public class Definitions {
                 .addKey(context.getDrawable(R.drawable.ic_keyboard_arrow_down_24dp), CODE_ARROW_DOWN).asRepeatable()
                 .addKey(context.getDrawable(R.drawable.ic_keyboard_arrow_up_24dp), CODE_ARROW_UP).asRepeatable()
                 .addKey(context.getDrawable(R.drawable.ic_keyboard_arrow_right_24dp), CODE_ARROW_RIGHT).asRepeatable()
-                .addKey("SYM", CODE_SYMBOLS).onCtrlShow("CLIP")
+                .addEnterKey()
         ;
     }
 
@@ -267,8 +267,7 @@ public class Definitions {
         for (int i = (chars.length + 1) / 2; i < chars.length; i++) {
             preprocessKey(keyboard, chars[i]).withSize(.7f);
         }
-        keyboard.addEnterKey();
-
+        keyboard.addAltKey();
     }
 
 }

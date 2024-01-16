@@ -114,21 +114,7 @@ public class CodeBoardIME extends InputMethodService
                 } else {
                     mKeyboardState = R.integer.keyboard_normal;
                 }
-                // regenerate view
-                //Simple remove shift
-                if (shift) {
-                    shift = false;
-                    shiftLock = false;
-                    ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_SHIFT_LEFT));
-                }
-                if (ctrl) {
-                    ctrl = false;
-                    ctrlLock = false;
-                    ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_CTRL_LEFT));
-                }
-                setInputView(onCreateInputView());
-                controlKeyUpdateView();
-                shiftKeyUpdateView();
+                regenerateView(ic);
                 break;
 
             case 17: //KEYCODE_CTRL_LEFT:
@@ -258,6 +244,9 @@ public class CodeBoardIME extends InputMethodService
                         break;
                     case -23:
                         ke = KeyEvent.KEYCODE_PAGE_DOWN;
+                        break;
+                    case -64:
+                        ke = 32;//TODO change
                         break;
 
                     //These are like a directional joystick - can jump outside the inputConnection
@@ -393,23 +382,11 @@ public class CodeBoardIME extends InputMethodService
         }
 
         if (keyCode == 17) {
-            ctrlLock = !ctrlLock;
-            if (ctrlLock) {
-                ctrl = true;
-                ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_CTRL_LEFT));
-            } else {
-                ctrl = false;
-                ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_CTRL_LEFT));
-            }
-            controlKeyUpdateView();
+            // equivalent to SYM
+            mKeyboardState = mKeyboardState == R.integer.keyboard_sym ? R.integer.keyboard_normal : R.integer.keyboard_sym;
+            regenerateView(ic);
         }
 
-        if (keyCode == 32) {
-            InputMethodManager imm = (InputMethodManager)
-                    getSystemService(Context.INPUT_METHOD_SERVICE);
-            if (imm != null)
-                imm.showInputMethodPicker();
-        }
 
         if (vibratorOn) {
             Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -590,6 +567,9 @@ public class CodeBoardIME extends InputMethodService
         super.onStartInputView(attribute, restarting);
         setInputView(onCreateInputView());
         sEditorInfo = attribute;
+        if(attribute.initialCapsMode != 0) {
+            mCurrentKeyboardLayoutView.applyShiftModifier(shift);
+        }
     }
 
     public void controlKeyUpdateView() {
@@ -598,6 +578,23 @@ public class CodeBoardIME extends InputMethodService
 
     public void shiftKeyUpdateView() {
         mCurrentKeyboardLayoutView.applyShiftModifier(shift);
+    }
+
+    public void regenerateView(InputConnection ic) {
+        //Simple remove shift
+        if (shift) {
+            shift = false;
+            shiftLock = false;
+            ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_SHIFT_LEFT));
+        }
+        if (ctrl) {
+            ctrl = false;
+            ctrlLock = false;
+            ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_CTRL_LEFT));
+        }
+        setInputView(onCreateInputView());
+        controlKeyUpdateView();
+        shiftKeyUpdateView();
     }
 
     private void clearLongPressTimer() {
